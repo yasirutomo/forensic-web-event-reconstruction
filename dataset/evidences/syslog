@@ -1,0 +1,26 @@
+Jan 18 12:17:01 intranet-server CRON[28570]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)
+Jan 18 12:39:01 intranet-server CRON[28623]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)
+Jan 18 12:39:23 intranet-server systemd[1]: Starting Clean php session files...
+Jan 18 12:39:24 intranet-server systemd[1]: Started Clean php session files.
+Jan 18 13:09:01 intranet-server CRON[28723]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)
+Jan 18 13:09:23 intranet-server systemd[1]: Starting Clean php session files...
+Jan 18 13:09:24 intranet-server systemd[1]: Started Clean php session files.
+Jan 18 13:09:45 intranet-server systemd-timesyncd[4706]: Network configuration changed, trying to establish connection.
+Jan 18 13:09:45 intranet-server systemd-networkd[4690]: ens3: Configured
+Jan 18 13:09:46 intranet-server systemd-timesyncd[4706]: Synchronized to time server 91.189.91.157:123 (ntp.ubuntu.com).
+Jan 18 13:14:31 intranet-server systemd[1]: Created slice User Slice of phopkins.
+Jan 18 13:14:31 intranet-server systemd[1]: Starting User Manager for UID 1001...
+Jan 18 13:14:31 intranet-server systemd[1]: Started Session c1 of user phopkins.
+Jan 18 13:14:32 intranet-server systemd[28817]: Listening on GnuPG cryptographic agent (ssh-agent emulation).
+Jan 18 13:14:32 intranet-server systemd[28817]: Reached target Timers.
+Jan 18 13:14:32 intranet-server systemd[28817]: Listening on GnuPG cryptographic agent and passphrase cache (access for web browsers).
+Jan 18 13:14:32 intranet-server systemd[28817]: Listening on REST API socket for snapd user session agent.
+Jan 18 13:14:32 intranet-server systemd[28817]: Listening on GnuPG cryptographic agent and passphrase cache.
+Jan 18 13:14:32 intranet-server systemd[28817]: Listening on GnuPG network certificate management daemon.
+Jan 18 13:14:32 intranet-server systemd[28817]: Listening on GnuPG cryptographic agent and passphrase cache (restricted).
+Jan 18 13:14:32 intranet-server systemd[28817]: Reached target Sockets.
+Jan 18 13:14:32 intranet-server systemd[28817]: Reached target Paths.
+Jan 18 13:14:32 intranet-server systemd[28817]: Reached target Basic System.
+Jan 18 13:14:32 intranet-server systemd[28817]: Reached target Default.
+Jan 18 13:14:32 intranet-server systemd[28817]: Startup finished in 415ms.
+Jan 18 13:14:32 intranet-server systemd[1]: Started User Manager for UID 1001.

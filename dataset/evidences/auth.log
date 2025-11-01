@@ -1,0 +1,19 @@
+Jan 18 12:17:01 intranet-server CRON[28569]: pam_unix(cron:session): session opened for user root by (uid=0)
+Jan 18 12:17:01 intranet-server CRON[28569]: pam_unix(cron:session): session closed for user root
+Jan 18 12:17:31 intranet-server sshd[28573]: Did not receive identification string from 172.17.130.196 port 52000
+Jan 18 12:39:01 intranet-server CRON[28622]: pam_unix(cron:session): session opened for user root by (uid=0)
+Jan 18 12:39:01 intranet-server CRON[28622]: pam_unix(cron:session): session closed for user root
+Jan 18 13:09:01 intranet-server CRON[28722]: pam_unix(cron:session): session opened for user root by (uid=0)
+Jan 18 13:09:01 intranet-server CRON[28722]: pam_unix(cron:session): session closed for user root
+Jan 18 13:14:31 intranet-server su[28816]: Successful su for phopkins by www-data
+Jan 18 13:14:31 intranet-server su[28816]: + /dev/pts/1 www-data:phopkins
+Jan 18 13:14:31 intranet-server su[28816]: pam_unix(su:session): session opened for user phopkins by (uid=33)
+Jan 18 13:14:31 intranet-server systemd-logind[1011]: New session c1 of user phopkins.
+Jan 18 13:14:31 intranet-server systemd: pam_unix(systemd-user:session): session opened for user phopkins by (uid=0)
+Jan 18 13:14:41 intranet-server sudo: phopkins : TTY=pts/1 ; PWD=/var/www/intranet.price.fox.org/wp-content/uploads/2022/01 ; USER=root ; COMMAND=list
+Jan 18 13:14:43 intranet-server sudo: phopkins : TTY=pts/1 ; PWD=/var/www/intranet.price.fox.org/wp-content/uploads/2022/01 ; USER=root ; COMMAND=/bin/ls -laR /root/
+Jan 18 13:14:43 intranet-server sudo: pam_unix(sudo:session): session opened for user root by (uid=0)
+Jan 18 13:14:43 intranet-server sudo: pam_unix(sudo:session): session closed for user root
+Jan 18 13:14:49 intranet-server sudo: phopkins : TTY=pts/1 ; PWD=/var/www/intranet.price.fox.org/wp-content/uploads/2022/01 ; USER=root ; COMMAND=/bin/cat /etc/shadow
+Jan 18 13:14:49 intranet-server sudo: pam_unix(sudo:session): session opened for user root by (uid=0)
+Jan 18 13:14:49 intranet-server sudo: pam_unix(sudo:session): session closed for user root
