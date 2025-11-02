@@ -19,6 +19,7 @@ This repository contains tools and workflow for reconstructing web attack events
 ---
 
 ## Folder Structure
+```bash
 dataset/
 ├── evidences/ # Source evidence logs
 ├── plaso-output.plaso # Generated Plaso file
