@@ -15,7 +15,7 @@ This repository contains tools and workflow for web attack event reconstruction 
 - Simple Event Correlator (SEC)  
   https://simple-evcorr.github.io/
 
-## Folder Structure
+## Dataset Folder Structure
 ```bash
 dataset/
 ├── evidences/ # Source evidence logs
@@ -31,16 +31,15 @@ dataset/
 ```bash 
 log2timeline --storage_file=../dataset/plaso-output.plaso --timezone UTC --preferred_year 2022 ../dataset/evidences
 ```
-### 2. Export to CSV
 * in Plaso directory:
 ```bash 
 psort -o l2tcsv -w data/plaso-result.csv data/plaso-output.plaso
 ```
-### 3. Run Log Decoder
+### 2. Run Log Decoder
 ```bash 
 python log-decoder.py --csv dataset/plaso-result.csv --out dataset/decoded.log
 ```
-### 4. Run SEC
+### 3. Run SEC
 * Copy the rule file: web-attack-rules.conf → SEC rules directory 
 * in SEC directory:
 ```bash 
@@ -48,5 +47,5 @@ cat ../dataset/decoded.log | ./sec -conf=../dataset/web-attack-rules.conf -input
 ```
 
 ## Ouput
-decoded.log (Log Decoder output): timeline log with decoded payloads
-fer-web-result.log (SEC output): correlated attack sequence based on rules
+* decoded.log (Log Decoder output): timeline log with decoded payloads
+* fer-web-result.log (SEC output): correlated attack sequence based on rules
