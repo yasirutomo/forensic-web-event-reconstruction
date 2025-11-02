@@ -43,7 +43,7 @@ python log-decoder.py --csv dataset/plaso-result.csv --out dataset/decoded.log
 * Copy the rule file: web-attack-rules.conf → SEC rules directory 
 * in SEC directory:
 ```bash 
-cat ../dataset/decoded.log | ./sec -conf=../dataset/web-attack-rules.conf -input=-
+cat ../dataset/decoded.log | ./sec -conf=web-attack-rules.conf -input=-
 ```
 
 ## Ouput
