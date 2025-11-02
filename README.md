@@ -18,7 +18,7 @@ This repository contains tools and workflow for web attack event reconstruction 
 ## Dataset Folder Structure
 ```bash
 dataset/
-├── evidences/ # Source evidence logs
+├── evidences/ # Source evidence logs (change the evidences based on the case)
 ├── plaso-output.plaso # Generated Plaso file from dataset/evidences
 ├── plaso-result.csv # Exported timeline CSV from plaso
 ├── decoded.log # Output from log decoder
