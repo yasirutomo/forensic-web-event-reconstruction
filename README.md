@@ -48,4 +48,4 @@ cat ../dataset/decoded.log | ./sec -conf=../dataset/web-attack-rules.conf -input
 
 ## Ouput
 * decoded.log (Log Decoder output): timeline log with decoded payloads
-* fer-web-result.log (SEC output): correlated attack sequence based on rules
+* fer-web-result.log (SEC output): web attack sequence based on rules
