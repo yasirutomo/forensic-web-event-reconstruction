@@ -1,14 +1,15 @@
 # Forensic Web Event Reconstruction
 
-This repository contains tools and workflow for reconstructing web attack events using:
+This repository contains tools and workflow for web attack event reconstruction using:
 
 - **Plaso (log2timeline)** for timeline generation  
-- **Custom Log Decoder** for decoding suspicious encoded web commands  
-- **Simple Event Correlator (SEC)** for event correlation and attack chain reconstruction  
+- **Custom Log Decoder** for decoding suspicious encoded web commands in logs 
+- **Simple Event Correlator (SEC)** for event correlation and attack chain reconstruction using custom rules  
 
 ## Requirements
 
-- Python 3.x
+- Python 3.12
+- requirements.txt
 - Plaso  
   https://plaso.readthedocs.io/
 - Simple Event Correlator (SEC)  
