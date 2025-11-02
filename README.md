@@ -33,7 +33,7 @@ log2timeline --storage_file=../dataset/plaso-output.plaso --timezone UTC --prefe
 ```
 * in Plaso directory:
 ```bash 
-psort -o l2tcsv -w data/plaso-result.csv data/plaso-output.plaso
+psort -o l2tcsv -w ../dataset/plaso-result.csv ../dataset/plaso-output.plaso
 ```
 ### 2. Run Log Decoder
 ```bash 
