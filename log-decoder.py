@@ -33,36 +33,36 @@ CMD_START_DECODED = re.compile(r'^(?:' + r'|'.join(_escaped) + r')\s', flags=re.
 # For raw values (may contain + or %20 between keyword and args)
 CMD_START_RAW = re.compile(r'^(?:' + r'|'.join(_escaped) + r')(?:(?:\+)|(?:%20)|(?:\s))', flags=re.IGNORECASE)
 
-# Ubah list ke set agar pencarian kata lebih cepat (O(1) lookup).
+# convert the list to a set to make word lookup faster
 KW_SET = set(COMMAND_KEYWORDS)
 
 def score_text_for_commands(text: str) -> int:
-    # Jika teks kosong, langsung kembalikan skor 0
+    # if empty, return 0
     if not text:
         return 0
     
-    # Ubah semua huruf ke lowercase agar pencarian tidak case-sensitive
+    # change all to lowercase (case-insensitive)
     t = text.lower()
     
     try:
-        # Jika string bisa diparse sebagai JSON list, gabungkan isinya menjadi teks
-        # Contoh: '["id","whoami"]' → "id whoami"
+        # if string can be parse as JSON list, gather as text
+        # eg.: '["id","whoami"]' → "id whoami"
         parsed = json.loads(t)
         if isinstance(parsed, list):
             t = " ".join(str(x).lower() for x in parsed)
     except Exception:
-        # Kalau gagal parse JSON, abaikan saja
+        # if not JSON, pass
         pass
 
     score = 0
-    # Cek satu per satu keyword
+    # check keyword one by one
     for kw in KW_SET:
-        # Gunakan regex untuk memastikan cocok sebagai kata utuh
-        # (?<![a-z0-9]) → sebelum keyword tidak boleh huruf/angka
-        # (?![a-z0-9]) → setelah keyword tidak boleh huruf/angka
-        # Dengan begitu "id" tidak akan match di "userid"
+        # use regex to ensure a whole-word match
+        # (?<![a-z0-9]) → No letter or digit may appear immediately before the keyword
+        # (?![a-z0-9]) → No letter or digit may appear immediately after the keyword
+        # so "id" will not match with "userid" and similar cases
         if re.search(r'(?<![a-z0-9])' + re.escape(kw) + r'(?![a-z0-9])', t):
-            score += 1 # Tambah skor jika keyword ditemukan
+            score += 1 # add score if keyword found
     return score
 
 def try_url_unquote(s: str) -> Optional[str]:
@@ -152,13 +152,13 @@ def multi_try_decode(s: str) -> List[Tuple[str,str,int]]:
     if not s:
         return results
     
-    # --- tahap 1: coba URL decode ---
+    # --- step 1: try URL decode ---
     url = try_url_unquote(s)
     s2 = url if url and url!=s else s
     if url and url!=s:
         results.append(('url-unquote', s2, score_text_for_commands(s2)))
     
-    # --- tahap 2: coba berbagai metode decoding ---
+    # --- step 2: try multiple decoding method ---
     for name, fn in [
                      ('hex', try_hex), 
                      ('base64', try_base64),
@@ -166,146 +166,87 @@ def multi_try_decode(s: str) -> List[Tuple[str,str,int]]:
                      ('rot13', try_rot13)]:
         try:
             out = fn(s2)
-            if out: # kalau decode berhasil
-                sc = score_text_for_commands(out) # hitung skor (indikasi command berbahaya)
+            if out: # if decode success
+                sc = score_text_for_commands(out) # count scor (Indication of a potentially dangerous command)
                 results.append((name, out, sc))
         except Exception:
-            pass # kalau gagal decode, lanjut metode berikutnya
+            pass # if fail, continue to next method
     
-    # --- tahap 3: coba XOR single-byte (hanya untuk hex input) ---
-    # (teknik sering dipakai malware/webshell untuk menyembunyikan perintah)
+    # --- step 3: try XOR single-byte (only for hex input) ---
+    # (This technique is often used by malware/webshells to conceal commands)
     xor = try_xor_single_byte_hex(s2)
     if xor:
-        k, out = xor # k = key xor, out = hasil decode
+        k, out = xor # k = key xor, out = decode result
         sc = score_text_for_commands(out)
         results.append((f'single-byte-xor-key={k}', out, sc))
 
-    # --- tahap 4: sortir hasil berdasarkan skor tertinggi ---
+    # --- step 4: sort results by highest score ---
     results.sort(key=lambda x: (x[2],), reverse=True)
     return results
 
 def choose_best_candidate(candidates):
-    # Jika tidak ada kandidat, tidak ada yang bisa dipilih → kembalikan None
+    # If there are no candidates, there is nothing to select, return None
     if not candidates:
         return None
     
-    # 1) Urutkan kandidat berdasarkan (skor, panjang teks) secara menurun.
-    #    - x[2] adalah skor (score_text_for_commands)
-    #    - -len(x[1]) membuat kandidat yang teksnya lebih panjang diprioritaskan
-    #    - reverse=True => nilai terbesar (skor tinggi, teks panjang) di depan
+    # 1) Sort candidates by (score, text length) in descending order.
+    #    - x[2] is the score (score_text_for_commands)
+    #    - -len(x[1]) make candidates with longer texts prioritized
+    #    - reverse=True => highest value (high score, long text) in front
     candidates_sorted = sorted(candidates, key=lambda x: (x[2], -len(x[1])), reverse=True)
 
-    # Ambil skor tertinggi dari kandidat teratas
+    # Take the highest score from the top candidates
     top_score = candidates_sorted[0][2]
 
-    # 2) Jika skor tertinggi > 0 (ada indikasi "mencurigakan"), pilih dari mereka
+    # 2) If the highest score > 0 (there is an indication of "suspicious"), choose from them.
     if top_score > 0:
-        # kumpulkan semua kandidat yang punya skor sama dengan skor tertinggi
+        # collect all candidates who have the same score as the highest score
         top_candidates = [c for c in candidates_sorted if c[2]==top_score]
 
-        # dari kandidat dengan skor tertinggi, pilih yang paling miri teks perintah
+        # From the candidates with the highest scores, select the one that most closely resembles the command text.
         def pref(c):
-            text = c[1] # teks hasil decoding
+            text = c[1] # decoded text
             bonus = 0
 
-            # jika teks dimulai dengan '[' atau '{' atau mengandung kutipan,
-            # kemungkinan ini struktur data (JSON/list) atau string berisi perintah → beri bonus
+            # if the text starts with '[' or '{' or contains quotes,
+            # this is probably a data structure (JSON/list) or string containing the command, give bonus
             if text.startswith('[') or text.startswith('{') or '"' in text or "'" in text:
                 bonus += 1
 
-            # jika dalam 50 karakter pertama ada karakter kontrol (< 32),
-            # byte kontrol di awal mengurangi kemungkinan bahwa decode itu adalah perintah manusia
-            # itu bisa tanda binary/garbage → kurangi preferensi
+            # If there are control characters (<32) in the first 50 characters,
+            # the control byte at the beginning reduces the likelihood that the decode is a human command
+            # it can be a binary/garbage sign, reduce preference
             if any(ord(ch) < 32 for ch in text[:50]):
-                # Penalti -1 dipilih cuma sebagai penalty ringan (bukan membuang total skor), 
-                # untuk menurunkan prioritas kandidat yang terlihat biner/garbage.
+                # The -1 penalty was chosen only as a minor penalty (not to discard the total score),
+                # to lower the priority of candidates that appear binary/garbage.
                 bonus -= 1
             return bonus
         
-        # Urutkan top_candidates berdasarkan pref() menurun (lebih disukai di depan)
+        # Sort top_candidates by pref() descending (preferably at the front)
         top_candidates.sort(key=lambda x: pref(x), reverse=True)
         return top_candidates[0]
 
-    # 3) Jika tidak ada kandidat dengan skor > 0 (tidak ada yang jelas mencurigakan),
-    #    gunakan urutan preferensi tetap berdasarkan metode decoding:
-    #    (preferensi: base64 dulu, lalu base64+decompress, hex, dll.)
+    # 3) If there are no candidates with a score > 0 (nothing clearly suspicious),
+    #    use a fixed preference order based on the decoding method:
+    #    (preference: base64 first, then base64+decompress, hex, etc.)
     preferred_order = ['base64',
                        'base64+decompress',
                        'hex',
-                    #    'ascii85',
-                    #    'base32',
                        'rot13',
                        'uuencode']
     for pref in preferred_order:
-        # c[0] diasumsikan adalah nama/metode decoding
+        # c[0] is assumed to be the name/decoding method
         for c in candidates:
             if c[0]==pref:
-                return c # jika ada kandidat dengan metode yg diinginkan, pilih itu
+                return c # if there is a candidate with the desired method, select it
             
-    # 4) Jika tidak ada yang cocok dengan preferensi, kembalikan kandidat pertama (terurut berdasarkan skor)
+    # 4) If none match the preferences, return the first candidate (sorted by score)
     return candidates[0]
 
 def decode_and_choose(encoded: str):
     candidates = multi_try_decode(encoded)
     best = choose_best_candidate(candidates)
     return candidates, best
-
-# def detect_sqli_in_url(msg_raw: str) -> Optional[str]:
-#     """
-#     Detect simple SQL injection probes in the request URI/query string.
-#     Returns a short extracted suspicious fragment (decoded) or None.
-#     """
-#     try:
-#         # try to extract the request path/query from the message (common pattern: http_request: GET <path> HTTP/1.1)
-#         m = re.search(r'http_request:\s*(?:GET|POST|PUT|DELETE|HEAD)\s+([^ ]+)', msg_raw, flags=re.IGNORECASE)
-#         if not m:
-#             # fallback: try to locate the first '?...' occurrence
-#             m2 = re.search(r'(/[^?\s]*\?[^ "]+)', msg_raw)
-#             if m2:
-#                 uri = m2.group(1)
-#             else:
-#                 return None
-#         else:
-#             uri = m.group(1)
-#         # Replace ~XX style to %XX (some logs use ~ as percent marker), then URL-decode
-#         uri = uri.replace('~', '%')
-#         try:
-#             uri_dec = urllib.parse.unquote_plus(uri)
-#         except Exception:
-#             uri_dec = uri
-#         # Only inspect the query part after ?
-#         q = uri_dec.split('?',1)[1] if '?' in uri_dec else uri_dec
-#         q_low = q.lower()
-
-#         # Common SQLi indicators (short list). If matched, return the suspicious decoded fragment.
-#         patterns = [
-#             r"(?i)\bunion\b\s+\ball\b\s+\bselect\b",   # union all select
-#             r"(?i)\bunion\b\s+\bselect\b",             # union select
-#             r"(?i)\bselect\b.+\bfrom\b",                # select ... from ...
-#             r"(?i)@@version\b",                         # mysql version variable
-#             r"(?i)\binformation_schema\b",              # information_schema
-#             r"(?i)\bbenchmark\s*\(",                    # benchmark( ) often used in time-based sqli
-#             r"(?i)\bsleep\s*\(",                        # sleep()
-#             # r"(?i)--\s*$",                              # trailing SQL comment
-#             r"(?i)%27\s+or\s+%271%27=%271",             # encoded ' OR '1'='1' pattern (percent-encoded)
-#             r"(?i)or\s+1=1",                            # tautology
-#             r"(?i)concat\(",                            # concat used in injections
-#             r"(?i)information_schema\.tables",          # information_schema.tables
-#             r"(?i)union.+select.+@@version",            # union select @@version
-#             r"(?i)'\s*or\s*'1'='1",                     # common tautology
-#             r'(?i)"\s*or\s*"1"="1'
-#         ]
-#         for pat in patterns:
-#             if re.search(pat, q_low):
-#                 # return a normalized snippet (original decoded query)
-#                 snippet = q
-#                 # truncate snippet to reasonable length
-#                 if len(snippet) > 200:
-#                     snippet = snippet[:200] + "..."
-#                 return snippet
-#         return None
-#     except Exception:
-#         return None
 
 def split_shell_like(snippet: str) -> List[str]:
     """Split snippet into shell-like fragments (separator ;, &&, ||, |, newline or encoded forms)."""
@@ -386,17 +327,10 @@ def detect_rce_query_simple(msg_raw: str) -> Optional[Tuple[str, List[str]]]:
         return None
 
 def is_binary_like(msg_raw: str) -> bool:
-    """
-    Return True if message likely contains binary / non-printable characters.
-    """
+    # Return True if message likely contains binary / non-printable characters.
     return any(ord(c) < 32 and c not in ("\n", "\r", "\t") for c in msg_raw)
 
 def decode_wp_meta_from_msg(msg_raw: str) -> str:
-    """
-    - Jika user_agent terdeteksi tool/script -> lakukan decoding wp_meta (seperti sebelumnya)
-    - TETAPI selalu jalankan detect_sqli_in_url() untuk menambahkan [SQLi: "..."] bila terdeteksi,
-      terlepas dari user_agent.
-    """
     original = msg_raw
 
     # --- existing decode behavior (only for suspicious user agents) ---
@@ -430,13 +364,6 @@ def decode_wp_meta_from_msg(msg_raw: str) -> str:
                     decoded_annotation = f"{original} [DECODE FAILED: no candidates]"
     # if not suspicious UA, leave decoded_annotation = None (we will use original)
 
-    # --- run SQLi di raw message ---
-    # sqli = detect_sqli_in_url(original)
-    # if sqli:
-    #     sqli_suffix = f' [SQLi: "{sqli}"]'
-    # else:
-    #     sqli_suffix = ""
-    
     # --- run RCE detection di raw message ---
     rce = detect_rce_query_simple(original)
     if rce:
@@ -449,15 +376,7 @@ def decode_wp_meta_from_msg(msg_raw: str) -> str:
     else:
         rce_suffix = ""
 
-    # --- susun output ---
-    # if decoded_annotation:
-    #     return decoded_annotation + sqli_suffix + rce_suffix
-    # else:
-    #     return original + sqli_suffix + rce_suffix
-    # if decoded_annotation:
-    #     return decoded_annotation
-    # else:
-    #     return original
+    # --- finalize output ---
     if decoded_annotation:
         return decoded_annotation + rce_suffix
     else:
@@ -468,7 +387,7 @@ def convert_csv_to_log(csv_file: str, log_file: str):
     if not os.path.exists(csv_file):
         raise FileNotFoundError(csv_file)
     
-    # Hitung total baris terlebih dahulu
+    # Calculate the total rows
     with open(csv_file, newline='', encoding="utf-8", errors='replace') as f:
         total_lines = sum(1 for _ in f)
     print(f"Total lines in {csv_file}: {total_lines}")
@@ -506,7 +425,7 @@ def convert_csv_to_log(csv_file: str, log_file: str):
             except Exception:
                 continue
 
-            # Progress tiap 50.000 baris
+            # Progress every 50.000 rows
             if processed % 50000 == 0:
                 print(f"Processed {processed}/{total_lines} lines ({processed/total_lines:.2%})")
 
