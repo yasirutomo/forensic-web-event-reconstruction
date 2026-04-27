@@ -49,3 +49,6 @@ cat ../dataset/decoded.log | ./sec -conf=web-attack-rules.conf -input=-
 ## Ouput
 * decoded.log (Log Decoder output): timeline log with decoded payloads
 * fer-web-result.log (SEC output): web attack sequence based on rules
+
+## Paper
+* M. N. Y. Utomo, H. Studiawan and B. A. Pratomo, "Forensic Event Reconstruction of Web Attacks Using Log Decoder and Rule-Based Correlation," 2026 14th International Symposium on Digital Forensics and Security (ISDFS), Boston, MA, USA, 2026, pp. 1-6, doi: 10.1109/ISDFS69419.2026.11458968. [https://doi.org/10.1109/ISDFS69419.2026.11458968](https://doi.org/10.1109/ISDFS69419.2026.11458968)
